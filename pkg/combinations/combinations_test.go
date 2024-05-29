@@ -20,15 +20,14 @@ func TestGetValidCombinations(t *testing.T) {
 }
 
 func TestGetValues(t *testing.T) {
-	nl := NumberList{"12", "13", "14", "15", "23", "24"}
 
-	got := GetValues(nl)
+	got := GetValues()
 
 	want := DigitCombinations{}
-	want["3"] = NumberList{"12"}
-	want["4"] = NumberList{"13"}
-	want["5"] = NumberList{"14", "23"}
-	want["6"] = NumberList{"15", "24"}
+	want[3] = NumberList{"12"}
+	want[4] = NumberList{"13"}
+	want[5] = NumberList{"14", "23"}
+	want[6] = NumberList{"15", "24"}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
@@ -37,17 +36,17 @@ func TestGetValues(t *testing.T) {
 
 func TestCombinations(t *testing.T) {
 	dc := DigitCombinations{}
-	dc["3"] = NumberList{"12"}
-	dc["4"] = NumberList{"13"}
-	dc["5"] = NumberList{"14", "23"}
-	dc["6"] = NumberList{"15", "24"}
+	dc[3] = NumberList{"12"}
+	dc[4] = NumberList{"13"}
+	dc[5] = NumberList{"14", "23"}
+	dc[6] = NumberList{"15", "24"}
 
 	got := Combinations{}
 
-	got.Add("2", dc)
+	got.Add(2, dc)
 
 	want := Combinations{}
-	want["2"] = dc
+	want[2] = dc
 
 	fmt.Printf("got %v", got)
 }

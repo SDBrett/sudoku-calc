@@ -1,13 +1,10 @@
 package combinations
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
-
-	utils "github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
 const (
@@ -16,23 +13,12 @@ const (
 	ErrValueDoesNotExist = ValueErr("cannot update value because it does not exist")
 )
 
+var all = NumberList{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
+
 type NumberList []string
 type ValueErr string
-type DigitCombinations map[string]NumberList
-type Combinations map[string]DigitCombinations
-
-func GetValidCombinations() {
-
-	twoDigitList := GetCombinations(1, nil)
-	threeDigitList := GetCombinations(2, twoDigitList)
-	fourDigitList := GetCombinations(3, threeDigitList)
-	fiveDigitList := GetCombinations(4, fourDigitList)
-	sixDigitList := GetCombinations(5, fiveDigitList)
-	sevenDigitList := GetCombinations(6, sixDigitList)
-	eightDigitList := GetCombinations(7, sevenDigitList)
-	nineDigitList := GetCombinations(8, eightDigitList)
-	fmt.Println(nineDigitList)
-}
+type DigitCombinations map[int]NumberList
+type Combinations map[int]DigitCombinations
 
 func sortString(w string) string {
 	s := strings.Split(w, "")
@@ -42,7 +28,6 @@ func sortString(w string) string {
 
 func GetCombinations(idx int, nl NumberList) NumberList {
 
-	all := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
 	if nl == nil {
 		nl = all
 	}
@@ -64,32 +49,44 @@ func GetCombinations(idx int, nl NumberList) NumberList {
 	return outlist
 }
 
-func GetValues(nl NumberList) DigitCombinations {
+func GetValues() DigitCombinations {
 
 	dc := DigitCombinations{}
 	value := 0
 	asInt := 0
-	var strValue string
-	for _, combination := range nl {
-		value = 0
-		idx := 1
-		for i := 0; i < len(combination); i++ {
-			asInt, _ = strconv.Atoi(combination[i:idx])
-			value += asInt
-			idx++
-		}
-		strValue = utils.IntToString(value)
-		err := dc.Update(strValue, combination)
-		if err == ErrValueDoesNotExist {
-			dc.Add(strValue, combination)
+	nl := all
+	numberOfDigits := 2
+	idx := 1
+	//var strValue string
+	for numberOfDigits < 10 {
+		nl = GetCombinations(idx, nl)
+
+		for _, combination := range nl {
+			value = 0
+			idx := 1
+			for i := 0; i < len(combination); i++ {
+				asInt, _ = strconv.Atoi(combination[i:idx])
+				value += asInt
+				idx++
+			}
+			//strValue = utils.IntToString(value)
+			err := dc.Update(value, combination)
+			if err == ErrValueDoesNotExist {
+				dc.Add(value, combination)
+			}
+
 		}
 
+		numberOfDigits++
+		idx++
+
 	}
+
 	return dc
 
 }
 
-func (dc DigitCombinations) Search(value string) (NumberList, error) {
+func (dc DigitCombinations) Search(value int) (NumberList, error) {
 
 	nl, ok := dc[value]
 
@@ -99,7 +96,7 @@ func (dc DigitCombinations) Search(value string) (NumberList, error) {
 	return nl, nil
 }
 
-func (dc DigitCombinations) Add(value string, combination string) error {
+func (dc DigitCombinations) Add(value int, combination string) error {
 	_, err := dc.Search(value)
 	switch err {
 	case ErrNotFound:
@@ -113,7 +110,7 @@ func (dc DigitCombinations) Add(value string, combination string) error {
 	return nil
 }
 
-func (dc DigitCombinations) Update(value string, combination string) error {
+func (dc DigitCombinations) Update(value int, combination string) error {
 
 	nl, err := dc.Search(value)
 	switch err {
@@ -133,7 +130,7 @@ func (e ValueErr) Error() string {
 	return string(e)
 }
 
-func (combo Combinations) Search(value string) (DigitCombinations, error) {
+func (combo Combinations) Search(value int) (DigitCombinations, error) {
 
 	nl, ok := combo[value]
 
@@ -143,7 +140,7 @@ func (combo Combinations) Search(value string) (DigitCombinations, error) {
 	return nl, nil
 }
 
-func (combo Combinations) Add(value string, dc DigitCombinations) error {
+func (combo Combinations) Add(value int, dc DigitCombinations) error {
 	_, err := combo.Search(value)
 	switch err {
 	case ErrNotFound:
