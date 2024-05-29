@@ -25,10 +25,10 @@ func TestGetValues(t *testing.T) {
 	got := GetValues(nl)
 
 	want := DigitCombinations{}
-	want[3] = NumberList{"12"}
-	want[4] = NumberList{"13"}
-	want[5] = NumberList{"14", "23"}
-	want[6] = NumberList{"15", "24"}
+	want["3"] = NumberList{"12"}
+	want["4"] = NumberList{"13"}
+	want["5"] = NumberList{"14", "23"}
+	want["6"] = NumberList{"15", "24"}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v want %v", got, want)
