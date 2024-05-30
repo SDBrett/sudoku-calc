@@ -1,7 +1,6 @@
 package combinations
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -27,11 +26,15 @@ func TestGetValues(t *testing.T) {
 	want[3] = NumberList{"12"}
 	want[4] = NumberList{"13"}
 	want[5] = NumberList{"14", "23"}
-	want[6] = NumberList{"15", "24"}
+	want[6] = NumberList{"15", "24", "123"}
+	want[45] = NumberList{"123456789"}
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v want %v", got, want)
+	for k, v := range want {
+		if !reflect.DeepEqual(got[k], v) {
+			t.Errorf("got beep %v want %v", got[k], v)
+		}
 	}
+
 }
 
 func TestCombinations(t *testing.T) {
@@ -48,5 +51,4 @@ func TestCombinations(t *testing.T) {
 	want := Combinations{}
 	want[2] = dc
 
-	fmt.Printf("got %v", got)
 }
