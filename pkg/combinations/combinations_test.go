@@ -8,7 +8,7 @@ import (
 func TestGetValidCombinations(t *testing.T) {
 	t.Run("Test two digit list", func(t *testing.T) {
 
-		got := GetCombinations(1, nil)
+		got := generateNumberLists(1, nil)
 		want := NumberList{"12", "13", "14", "15", "16", "17", "18", "19", "23", "24", "25", "26", "27", "28", "29", "34", "35", "36", "37", "38", "39", "45", "46", "47", "48", "49", "56", "57", "58", "59", "67", "68", "69", "78", "79", "89"}
 
 		if !reflect.DeepEqual(got, want) {
@@ -20,9 +20,9 @@ func TestGetValidCombinations(t *testing.T) {
 
 func TestGetValues(t *testing.T) {
 
-	got := GetValues()
+	got := getCombinationsForValue()
 
-	want := DigitCombinations{}
+	want := ValueCombinations{}
 	want[3] = NumberList{"12"}
 	want[4] = NumberList{"13"}
 	want[5] = NumberList{"14", "23"}
@@ -40,11 +40,11 @@ func TestGetValues(t *testing.T) {
 func TestCombinations(t *testing.T) {
 
 	got := GenerateDataSet()
-	want := Combinations{
-		4: DigitCombinations{
+	want := DataSet{
+		4: ValueCombinations{
 			21: NumberList{"1389", "1479", "1569", "1578", "2379", "2469", "2478", "2568", "3459", "3468", "3567"},
 		},
-		7: DigitCombinations{
+		7: ValueCombinations{
 			30: NumberList{"1234569", "1234578"},
 		},
 	}
