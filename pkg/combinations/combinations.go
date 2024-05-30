@@ -1,6 +1,7 @@
 package combinations
 
 import (
+	"log"
 	"slices"
 	"sort"
 	"strconv"
@@ -13,6 +14,7 @@ const (
 	ErrNotFound          = ValueErr("could not find the value you were looking for")
 	ErrValueExists       = ValueErr("cannot add value because it already exists")
 	ErrValueDoesNotExist = ValueErr("cannot update value because it does not exist")
+	ErrUpdating          = ValueErr("error updating")
 )
 
 var all = NumberList{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
@@ -66,8 +68,9 @@ func GetValues() DigitCombinations {
 			}
 
 			err := dc.Update(value, combination)
-			if err == ErrValueDoesNotExist {
-				dc.Add(value, combination)
+
+			if err != ErrUpdating && err != nil {
+				log.Fatal(err)
 			}
 
 		}
@@ -91,26 +94,13 @@ func (dc DigitCombinations) Search(value int) (NumberList, error) {
 	return nl, nil
 }
 
-func (dc DigitCombinations) Add(value int, combination string) error {
-	_, err := dc.Search(value)
-	switch err {
-	case ErrNotFound:
-		nl := NumberList{combination}
-		dc[value] = nl
-	case nil:
-		return ErrValueExists
-	default:
-		return err
-	}
-	return nil
-}
-
 func (dc DigitCombinations) Update(value int, combination string) error {
 
 	nl, err := dc.Search(value)
 	switch err {
 	case ErrNotFound:
-		return ErrValueDoesNotExist
+		nl := NumberList{combination}
+		dc[value] = nl
 	case nil:
 		nl = append(nl, combination)
 		dc[value] = nl
