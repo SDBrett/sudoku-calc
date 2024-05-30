@@ -57,3 +57,9 @@ func TestCombinations(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkGenerateDataSet(b *testing.B) {
+
+	GenerateDataSet()
+
+}
