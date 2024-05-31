@@ -23,6 +23,14 @@ type NumberList []string
 type ValueErr string
 type ValueCombinations map[int]NumberList
 type DataSet map[int]ValueCombinations
+type ValidateCombinations map[string]bool
+
+type DataSetQuery struct {
+	NumberOfDigits   int        //The number of digits
+	Value            int        //The Value for the digits to sum to
+	NumbersToExclude NumberList //Numbers which cannot be part of the solution
+	NumbersToInclude NumberList //Numbers which must be part of the solution
+}
 
 // Generate the DataSet of all possible combinations
 func GenerateDataSet() DataSet {
@@ -150,6 +158,115 @@ func (dc DataSet) Search(value int) (ValueCombinations, error) {
 		return nil, ErrNotFound
 	}
 	return nl, nil
+}
+
+func (dc DataSet) Query(dsq DataSetQuery) (NumberList, error) {
+
+	nl := NumberList{}
+
+	err := dsq.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	//combinations := dc[dsq.NumberOfDigits][dsq.Value]
+	// valid := ValidateCombinations{}
+
+	// for _, item := range combinations{
+	// 	valid[item] = true
+	// }
+
+	// for k,_ := range valid{
+	// 	for _, item := range dsq.NumbersToExclude{
+	// 		if strings.Contains(k,item){
+	// 			valid[k] = false
+	// 		}
+	// 	}
+	// 	if valid[k] == true {
+	// 	for _, item := range dsq.NumbersToInclude{
+	// 		if !strings.Contains(k,item){
+	// 			valid[k] = false
+	// 		}
+	// 	}
+	// 	if valid[k] == true {
+	// 		nl = append(nl, valid[k])
+	// 		}
+	// }
+
+	return nl, nil
+}
+
+func GetValidCombinations(combinations, exclude, include NumberList) NumberList {
+
+	valid := ValidateCombinations{}
+	nl := NumberList{}
+
+	for _, item := range combinations {
+		valid[item] = true
+	}
+
+	// All combinations start as valid and then checked to determine if invalid
+	for k := range valid {
+		// Invalidate if combination contains an excluded number
+		for _, item := range exclude {
+			if strings.Contains(k, item) {
+				valid[k] = false
+			}
+		}
+		// Invalidate if combination does not contain an included number
+		if valid[k] {
+			for _, item := range include {
+				if !strings.Contains(k, item) {
+					valid[k] = false
+				}
+			}
+		}
+		// if still valid add to the returned number list
+		if valid[k] {
+			nl = append(nl, k)
+		}
+	}
+	return nl
+}
+
+func (dsq DataSetQuery) Validate() error {
+
+	var err error
+	var x int
+
+	err = utils.ValidateNumberRange(1, 9, dsq.NumberOfDigits)
+	if err != nil {
+		return err
+	}
+
+	err = utils.ValidateNumberRange(3, 45, dsq.Value)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range dsq.NumbersToInclude {
+		x, err = utils.StringToInt(v)
+		if err != nil {
+			return err
+		}
+		err = utils.ValidateNumberRange(1, 9, x)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, v := range dsq.NumbersToExclude {
+		x, err = utils.StringToInt(v)
+		if err != nil {
+			return err
+		}
+		err = utils.ValidateNumberRange(1, 9, x)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func newDataSet() DataSet {
