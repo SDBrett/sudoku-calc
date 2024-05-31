@@ -10,6 +10,12 @@ type NumberRangeTestCases struct {
 	Expect error
 }
 
+type SearchTypeTestCases struct {
+	Name   string
+	Given  string
+	Expect error
+}
+
 func TestValidator(t *testing.T) {
 
 	numberRangeTestCases := []NumberRangeTestCases{
@@ -39,6 +45,25 @@ func TestValidator(t *testing.T) {
 	for _, test := range numberRangeTestCases {
 		t.Run(test.Name, func(t *testing.T) {
 			got := ValidateNumberRange(test.Min, test.Max, test.Given)
+			assertError(t, got, test.Expect)
+		})
+	}
+
+	searchTypeTestCases := []SearchTypeTestCases{
+		{
+			Name:   "valid search type",
+			Given:  "FULL",
+			Expect: nil,
+		},
+		{
+			Name:   "invalid search type",
+			Given:  "testing",
+			Expect: ErrInvalidSearchType,
+		},
+	}
+	for _, test := range searchTypeTestCases {
+		t.Run(test.Name, func(t *testing.T) {
+			got := ValidateSearchType(test.Given)
 			assertError(t, got, test.Expect)
 		})
 	}
