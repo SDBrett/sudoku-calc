@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	combinations "github.com/sdbrett/sudoku-calc/pkg/combinations"
+	sudokucalc "github.com/sdbrett/sudoku-calc/pkg"
 )
 
 func main() {
 
-	dataSet := combinations.GenerateDataSet()
+	dataSet := sudokucalc.GenerateDataSet()
 
 	jsonString, _ := json.Marshal(dataSet)
 
