@@ -97,6 +97,9 @@ func (dsq DataSetQuery) Validate() error {
 }
 
 func newDataSet() DataSet {
+
+	// value combinations can only contain 2 - 9 digits.
+	// Declared here to remove need for add / update functions for dataset
 	dataSet := DataSet{
 		2: ValueCombinations{},
 		3: ValueCombinations{},
