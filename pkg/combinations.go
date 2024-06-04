@@ -132,11 +132,13 @@ func GetValidCombinations(combinations, exclude, include NumberList) NumberList 
 	// All combinations start as valid and then checked to determine if invalid
 	for k := range valid {
 		// Invalidate if combination contains an excluded number
-		valid.CheckIfValid(k, exclude, true)
+		if valid[k] {
+			valid[k] = ConfirmNoExcludedNumbersInCombinations(k, exclude)
+		}
 
 		// Invalidate if combination does not contain an included number
 		if valid[k] {
-			valid.CheckIfValid(k, include, false)
+			valid[k] = ConfirmCombinationContainsIncludedNumbers(k, include)
 		}
 		// if still valid add to the returned number list
 		if valid[k] {
@@ -146,24 +148,20 @@ func GetValidCombinations(combinations, exclude, include NumberList) NumberList 
 	return nl
 }
 
-// Determine if combination is valid. set exclusion to true if combination should not contain digits in NumberList
-// Set exclude to false if combination must contain numbers from number list
-func (v ValidCombinations) CheckIfValid(candidateCombination string, nl NumberList, exclusion bool) {
-
-	switch exclusion {
-	case true:
-		for _, item := range nl {
-			if strings.Contains(candidateCombination, item) {
-				v[candidateCombination] = false
-				break
-			}
-		}
-	case false:
-		for _, item := range nl {
-			if !strings.Contains(candidateCombination, item) {
-				v[candidateCombination] = false
-				break
-			}
+func ConfirmCombinationContainsIncludedNumbers(candidateCombination string, includeNumberList NumberList) bool {
+	for _, item := range includeNumberList {
+		if !strings.Contains(candidateCombination, item) {
+			return false
 		}
 	}
+	return true
+}
+
+func ConfirmNoExcludedNumbersInCombinations(candidateCombination string, excludeNumberList NumberList) bool {
+	for _, item := range excludeNumberList {
+		if strings.Contains(candidateCombination, item) {
+			return false
+		}
+	}
+	return true
 }
