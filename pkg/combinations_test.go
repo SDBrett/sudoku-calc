@@ -25,21 +25,39 @@ func TestGenerateNumberLists(t *testing.T) {
 	})
 }
 
-// func TestGetValues(t *testing.T) {
+func TestValidation(t *testing.T) {
 
-// 	got := getCombinationsForValue()
+	numberRangeTestCases := []NumberRangeTestCases{
+		{
+			Name:        "Valid number within range",
+			Min:         1,
+			Max:         45,
+			Given:       9,
+			ExpectError: false,
+		},
+		{
+			Name:        "Valid number below range",
+			Min:         1,
+			Max:         45,
+			Given:       -1,
+			ExpectError: true,
+		},
+		{
+			Name:        "Valid number above range",
+			Min:         1,
+			Max:         9,
+			Given:       10,
+			ExpectError: true,
+		},
+	}
 
-// 	want := map[int][]string{}
-// 	want[3] = []string{"12"}
-// 	want[4] = []string{"13"}
-// 	want[5] = []string{"14", "23"}
-// 	want[6] = []string{"15", "24", "123"}
-// 	want[45] = []string{"123456789"}
-
-// 	for k, v := range want {
-// 		assertNumberList(t, got[k], v)
-// 	}
-// }
+	for _, test := range numberRangeTestCases {
+		t.Run(test.Name, func(t *testing.T) {
+			got := ValidateNumberRange(test.Min, test.Max, test.Given)
+			assertError(t, got, test.ExpectError)
+		})
+	}
+}
 
 func TestCombinations(t *testing.T) {
 

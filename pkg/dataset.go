@@ -1,7 +1,7 @@
 package sudokucalc
 
 import (
-	"strconv"
+	"log"
 )
 
 type DataSetQuery struct {
@@ -22,7 +22,10 @@ func GenerateDataSet() DataSet {
 		idx := 1
 		numberList = generateNumberLists(idx, numberList)
 		for _, combination := range numberList {
-			value := GetValueOfCombination(combination)
+			value, err := GetValueOfCombination(combination)
+			if err != nil {
+				log.Fatalf("number combination %s list contains invalid character", combination)
+			}
 			dataSet.UpdateValueCombination(numberOfDigits, value, combination)
 		}
 		idx++
@@ -37,17 +40,6 @@ func (ds DataSet) UpdateValueCombination(NumberOfDigits, Value int, Combination 
 	} else {
 		ds[NumberOfDigits][Value] = []string{Combination}
 	}
-}
-
-func GetValueOfCombination(combination string) int {
-	value := 0
-	idx := 1
-	for i := 0; i < len(combination); i++ {
-		asInt, _ := strconv.Atoi(combination[i:idx])
-		value += asInt
-		idx++
-	}
-	return value
 }
 
 func (ds DataSet) Query(dsq DataSetQuery) ([]string, error) {

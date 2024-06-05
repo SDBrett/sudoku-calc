@@ -1,16 +1,11 @@
 package sudokucalc
 
 import (
+	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
-)
-
-const (
-	ErrNotFound          = ValueErr("could not find the value you were looking for")
-	ErrValueExists       = ValueErr("cannot add value because it already exists")
-	ErrValueDoesNotExist = ValueErr("cannot update value because it does not exist")
-	ErrUpdating          = ValueErr("error updating")
 )
 
 var all = []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
@@ -41,10 +36,6 @@ func generateNumberLists(idx int, nl []string) []string {
 	}
 	sort.Strings(outlist)
 	return outlist
-}
-
-func (e ValueErr) Error() string {
-	return string(e)
 }
 
 func GetValidCombinations(combinations, exclude, include []string) []string {
@@ -91,4 +82,25 @@ func ConfirmNoExcludedNumbersInCombinations(candidateCombination string, exclude
 		}
 	}
 	return true
+}
+
+func GetValueOfCombination(combination string) (int, error) {
+	value := 0
+	idx := 1
+	for i := 0; i < len(combination); i++ {
+		asInt, err := strconv.Atoi(combination[i:idx])
+		if err != nil {
+			return 0, err
+		}
+		value += asInt
+		idx++
+	}
+	return value, nil
+}
+
+func ValidateNumberRange(min, max, given int) error {
+	if given < min || given > max {
+		return fmt.Errorf("number %d is outside range of %d and %d", given, min, max)
+	}
+	return nil
 }
