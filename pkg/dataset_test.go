@@ -6,8 +6,6 @@ import (
 	"os"
 	"reflect"
 	"testing"
-
-	"github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
 type dataSetQueryTestCase struct {
@@ -41,7 +39,7 @@ func TestDataSetValidation(t *testing.T) {
 				NumbersToExclude: []string{"8", "9", "45"},
 				NumbersToInclude: []string{"1", "2"},
 			},
-			Expect: utils.ErrExceedRange,
+			Expect: ErrExceedRange,
 		},
 	}
 	for _, test := range testCases {

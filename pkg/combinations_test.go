@@ -90,11 +90,3 @@ func assertNumberList(t testing.TB, got, want []string) {
 		t.Errorf("got %v want %v", got, want)
 	}
 }
-
-func assertError(t testing.TB, got, want error) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("got error %q want %q", got, want)
-	}
-}

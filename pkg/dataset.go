@@ -2,8 +2,6 @@ package sudokucalc
 
 import (
 	"strconv"
-
-	"github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
 type DataSetQuery struct {
@@ -71,33 +69,33 @@ func (dsq DataSetQuery) Validate() error {
 	var err error
 	var x int
 
-	err = utils.ValidateNumberRange(1, 9, dsq.NumberOfDigits)
+	err = ValidateNumberRange(1, 9, dsq.NumberOfDigits)
 	if err != nil {
 		return err
 	}
 
-	err = utils.ValidateNumberRange(3, 45, dsq.Value)
+	err = ValidateNumberRange(3, 45, dsq.Value)
 	if err != nil {
 		return err
 	}
 
 	for _, v := range dsq.NumbersToInclude {
-		x, err = utils.StringToInt(v)
+		x, err = StringToInt(v)
 		if err != nil {
 			return err
 		}
-		err = utils.ValidateNumberRange(1, 9, x)
+		err = ValidateNumberRange(1, 9, x)
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, v := range dsq.NumbersToExclude {
-		x, err = utils.StringToInt(v)
+		x, err = StringToInt(v)
 		if err != nil {
 			return err
 		}
-		err = utils.ValidateNumberRange(1, 9, x)
+		err = ValidateNumberRange(1, 9, x)
 		if err != nil {
 			return err
 		}

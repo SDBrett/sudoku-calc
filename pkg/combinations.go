@@ -4,8 +4,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-
-	"github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
 const (
@@ -34,7 +32,7 @@ func generateNumberLists(idx int, nl []string) []string {
 	for i := idx; i < len(all); i++ {
 		for x := 0; x < len(nl); x++ {
 			if !strings.Contains(nl[x], all[i]) {
-				sorted = utils.SortString(nl[x] + all[i])
+				sorted = SortString(nl[x] + all[i])
 				if !slices.Contains(outlist, sorted) {
 					outlist = append(outlist, sorted)
 				}
