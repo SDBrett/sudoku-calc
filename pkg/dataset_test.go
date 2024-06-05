@@ -28,8 +28,8 @@ func TestDataSetValidation(t *testing.T) {
 			DSQ: DataSetQuery{
 				NumberOfDigits:   3,
 				Value:            6,
-				NumbersToExclude: NumberList{"8", "9"},
-				NumbersToInclude: NumberList{"1", "2"},
+				NumbersToExclude: []string{"8", "9"},
+				NumbersToInclude: []string{"1", "2"},
 			},
 			Expect: nil,
 		},
@@ -38,8 +38,8 @@ func TestDataSetValidation(t *testing.T) {
 			DSQ: DataSetQuery{
 				NumberOfDigits:   3,
 				Value:            6,
-				NumbersToExclude: NumberList{"8", "9", "45"},
-				NumbersToInclude: NumberList{"1", "2"},
+				NumbersToExclude: []string{"8", "9", "45"},
+				NumbersToInclude: []string{"1", "2"},
 			},
 			Expect: utils.ErrExceedRange,
 		},
@@ -68,8 +68,8 @@ func TestDataSetQuery(t *testing.T) {
 	dsq := DataSetQuery{
 		NumberOfDigits:   4,
 		Value:            21,
-		NumbersToInclude: NumberList{"1"},
-		NumbersToExclude: NumberList{"5", "6"},
+		NumbersToInclude: []string{"1"},
+		NumbersToExclude: []string{"5", "6"},
 	}
 
 	ds := GenerateDataSet()
