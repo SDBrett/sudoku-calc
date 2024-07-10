@@ -53,7 +53,6 @@ func GetValues() DigitCombinations {
 	nl := all
 	numberOfDigits := 2
 	idx := 1
-	//var strValue string
 	for numberOfDigits < 10 {
 		nl = GetCombinations(idx, nl)
 
@@ -65,7 +64,7 @@ func GetValues() DigitCombinations {
 				value += asInt
 				idx++
 			}
-			//strValue = utils.IntToString(value)
+
 			err := dc.Update(value, combination)
 			if err == ErrValueDoesNotExist {
 				dc.Add(value, combination)
