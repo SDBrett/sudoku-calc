@@ -2,6 +2,7 @@ package sudokucalc
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -60,6 +61,26 @@ func TestFullDataSet(t *testing.T) {
 	if !reflect.DeepEqual(testDS, mockDS) {
 		t.Errorf("generated DS does not match imported")
 	}
+}
+
+func TestDataSetQuery(t *testing.T) {
+
+	dsq := DataSetQuery{
+		NumberOfDigits:   4,
+		Value:            21,
+		NumbersToInclude: NumberList{"1"},
+		NumbersToExclude: NumberList{"5", "6"},
+	}
+
+	ds := GenerateDataSet()
+
+	got, err := ds.Query(dsq)
+	if err != nil {
+		t.Errorf("got error %s", err)
+	}
+
+	fmt.Printf("%v", got)
+
 }
 
 func importDataSet(t testing.TB) DataSet {

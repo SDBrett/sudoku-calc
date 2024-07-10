@@ -7,10 +7,10 @@ import (
 type DataSet map[int]ValueCombinations
 
 type DataSetQuery struct {
-	NumberOfDigits   int        //The number of digits
-	Value            int        //The Value for the digits to sum to
-	NumbersToExclude NumberList //Numbers which cannot be part of the solution
-	NumbersToInclude NumberList //Numbers which must be part of the solution
+	NumberOfDigits   int        `json:"numberOfDigits"`  //The number of digits
+	Value            int        `json:"value"`           //The Value for the digits to sum to
+	NumbersToExclude NumberList `json:"excludedNumbers"` //Numbers which cannot be part of the solution
+	NumbersToInclude NumberList `json:"includedNumbers"` //Numbers which must be part of the solution
 }
 
 // Generate the DataSet of all possible combinations
@@ -34,24 +34,26 @@ func GenerateDataSet() DataSet {
 
 // Returns possible values and their combinations with a given
 // number of digits.
-func (dc DataSet) Search(value int) (ValueCombinations, error) {
+func (ds DataSet) Search(value int) (ValueCombinations, error) {
 
-	nl, ok := dc[value]
+	vc, ok := ds[value]
 
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return nl, nil
+	return vc, nil
 }
 
-func (dc DataSet) Query(dsq DataSetQuery) (NumberList, error) {
-
-	nl := NumberList{}
+func (ds DataSet) Query(dsq DataSetQuery) (NumberList, error) {
 
 	err := dsq.Validate()
 	if err != nil {
 		return nil, err
 	}
+
+	combinations := ds[dsq.NumberOfDigits][dsq.Value]
+
+	nl := GetValidCombinations(combinations, dsq.NumbersToExclude, dsq.NumbersToInclude)
 
 	return nl, nil
 }
