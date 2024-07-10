@@ -111,7 +111,6 @@ func getCombinationsForValue() ValueCombinations {
 	}
 
 	return dc
-
 }
 
 // Look up number combinations for a given value
@@ -169,30 +168,6 @@ func (dc DataSet) Query(dsq DataSetQuery) (NumberList, error) {
 		return nil, err
 	}
 
-	//combinations := dc[dsq.NumberOfDigits][dsq.Value]
-	// valid := ValidateCombinations{}
-
-	// for _, item := range combinations{
-	// 	valid[item] = true
-	// }
-
-	// for k,_ := range valid{
-	// 	for _, item := range dsq.NumbersToExclude{
-	// 		if strings.Contains(k,item){
-	// 			valid[k] = false
-	// 		}
-	// 	}
-	// 	if valid[k] == true {
-	// 	for _, item := range dsq.NumbersToInclude{
-	// 		if !strings.Contains(k,item){
-	// 			valid[k] = false
-	// 		}
-	// 	}
-	// 	if valid[k] == true {
-	// 		nl = append(nl, valid[k])
-	// 		}
-	// }
-
 	return nl, nil
 }
 
@@ -224,7 +199,7 @@ func GetValidCombinations(combinations, exclude, include NumberList) NumberList 
 
 // Determine if combination is valid. set exclusion to true if combination should not contain digits in NumberList
 // Set exclude to false if combination must contain numbers from number list
-func (v ValidateCombinations) CheckIfValid(candidateCombination string, nl NumberList, exclusion bool) bool {
+func (v ValidateCombinations) CheckIfValid(candidateCombination string, nl NumberList, exclusion bool) {
 
 	switch exclusion {
 	case true:
@@ -242,8 +217,6 @@ func (v ValidateCombinations) CheckIfValid(candidateCombination string, nl Numbe
 			}
 		}
 	}
-
-	return true
 }
 
 func (dsq DataSetQuery) Validate() error {
