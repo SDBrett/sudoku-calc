@@ -24,6 +24,32 @@ type ValueErr string
 type DigitCombinations map[int]NumberList
 type Combinations map[int]DigitCombinations
 
+func GenerateDataSet() Combinations {
+	combinationsByValue := GetValues()
+
+	dataSet := Combinations{
+		2: DigitCombinations{},
+		3: DigitCombinations{},
+		4: DigitCombinations{},
+		5: DigitCombinations{},
+		6: DigitCombinations{},
+		7: DigitCombinations{},
+		8: DigitCombinations{},
+		9: DigitCombinations{},
+	}
+
+	// k is the sum of the items in the array
+	// v is the list of combinations
+	for k, v := range combinationsByValue {
+		for i := 0; i < len(v); i++ {
+			// v[i] is an individual combination for total k
+			dataSet[len(v[i])].Update(k, v[i])
+		}
+	}
+
+	return dataSet
+}
+
 func GetCombinations(idx int, nl NumberList) NumberList {
 
 	if nl == nil {
@@ -123,17 +149,4 @@ func (combo Combinations) Search(value int) (DigitCombinations, error) {
 		return nil, ErrNotFound
 	}
 	return nl, nil
-}
-
-func (combo Combinations) Add(value int, dc DigitCombinations) error {
-	_, err := combo.Search(value)
-	switch err {
-	case ErrNotFound:
-		combo[value] = dc
-	case nil:
-		return ErrValueExists
-	default:
-		return err
-	}
-	return nil
 }

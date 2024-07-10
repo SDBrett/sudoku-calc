@@ -31,24 +31,29 @@ func TestGetValues(t *testing.T) {
 
 	for k, v := range want {
 		if !reflect.DeepEqual(got[k], v) {
-			t.Errorf("got beep %v want %v", got[k], v)
+			t.Errorf("got %v want %v", got[k], v)
 		}
 	}
 
 }
 
 func TestCombinations(t *testing.T) {
-	dc := DigitCombinations{}
-	dc[3] = NumberList{"12"}
-	dc[4] = NumberList{"13"}
-	dc[5] = NumberList{"14", "23"}
-	dc[6] = NumberList{"15", "24"}
 
-	got := Combinations{}
+	got := GenerateDataSet()
+	want := Combinations{
+		4: DigitCombinations{
+			21: NumberList{"1389", "1479", "1569", "1578", "2379", "2469", "2478", "2568", "3459", "3468", "3567"},
+		},
+		7: DigitCombinations{
+			30: NumberList{"1234569", "1234578"},
+		},
+	}
 
-	got.Add(2, dc)
-
-	want := Combinations{}
-	want[2] = dc
-
+	for k, v := range want {
+		for x, y := range v {
+			if !reflect.DeepEqual(got[k][x], y) {
+				t.Errorf("got %v want %v", got[k][x], y)
+			}
+		}
+	}
 }
