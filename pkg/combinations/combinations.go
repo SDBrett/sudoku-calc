@@ -208,18 +208,11 @@ func GetValidCombinations(combinations, exclude, include NumberList) NumberList 
 	// All combinations start as valid and then checked to determine if invalid
 	for k := range valid {
 		// Invalidate if combination contains an excluded number
-		for _, item := range exclude {
-			if strings.Contains(k, item) {
-				valid[k] = false
-			}
-		}
+		valid.CheckIfValid(k, exclude, true)
+
 		// Invalidate if combination does not contain an included number
 		if valid[k] {
-			for _, item := range include {
-				if !strings.Contains(k, item) {
-					valid[k] = false
-				}
-			}
+			valid.CheckIfValid(k, include, false)
 		}
 		// if still valid add to the returned number list
 		if valid[k] {
@@ -227,6 +220,30 @@ func GetValidCombinations(combinations, exclude, include NumberList) NumberList 
 		}
 	}
 	return nl
+}
+
+// Determine if combination is valid. set exclusion to true if combination should not contain digits in NumberList
+// Set exclude to false if combination must contain numbers from number list
+func (v ValidateCombinations) CheckIfValid(candidateCombination string, nl NumberList, exclusion bool) bool {
+
+	switch exclusion {
+	case true:
+		for _, item := range nl {
+			if strings.Contains(candidateCombination, item) {
+				v[candidateCombination] = false
+				break
+			}
+		}
+	case false:
+		for _, item := range nl {
+			if !strings.Contains(candidateCombination, item) {
+				v[candidateCombination] = false
+				break
+			}
+		}
+	}
+
+	return true
 }
 
 func (dsq DataSetQuery) Validate() error {
