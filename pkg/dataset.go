@@ -1,6 +1,8 @@
 package sudokucalc
 
-import "github.com/sdbrett/sudoku-calc/pkg/utils"
+import (
+	"github.com/sdbrett/sudoku-calc/pkg/utils"
+)
 
 type DataSet map[int]ValueCombinations
 

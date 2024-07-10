@@ -1,6 +1,9 @@
 package sudokucalc
 
 import (
+	"encoding/json"
+	"os"
+	"reflect"
 	"testing"
 
 	"github.com/sdbrett/sudoku-calc/pkg/utils"
@@ -46,5 +49,34 @@ func TestDataSetValidation(t *testing.T) {
 			assertError(t, got, test.Expect)
 		})
 	}
+
+}
+
+func TestFullDataSet(t *testing.T) {
+
+	mockDS := importDataSet(t)
+	testDS := GenerateDataSet()
+
+	if !reflect.DeepEqual(testDS, mockDS) {
+		t.Errorf("generated DS does not match imported")
+	}
+}
+
+func importDataSet(t testing.TB) DataSet {
+	t.Helper()
+	var ds DataSet
+	path := "testdata/dataset_testdata1"
+	i, err := os.ReadFile(path)
+	if err != nil {
+		t.Errorf("error reading file %s", path)
+	}
+
+	err = json.Unmarshal(i, &ds)
+
+	if err != nil {
+		t.Errorf("unable to create %T from test dataset", ds)
+	}
+
+	return ds
 
 }
