@@ -2,13 +2,22 @@ package sudokucalc
 
 import (
 	"log"
+	"strings"
 )
 
 type DataSetQuery struct {
-	NumberOfDigits   int      `json:"numberOfDigits"`  //The number of digits
-	Value            int      `json:"value"`           //The Value for the digits to sum to
-	NumbersToExclude []string `json:"excludedNumbers"` //Numbers which cannot be part of the solution
-	NumbersToInclude []string `json:"includedNumbers"` //Numbers which must be part of the solution
+	NumberOfDigits                     int      `json:"numberOfDigits"`                            //The number of digits
+	Value                              int      `json:"value"`                                     //The Value for the digits to sum to
+	NumbersToExclude                   []string `json:"excludedNumbers"`                           //Numbers which cannot be part of the solution
+	NumbersToInclude                   []string `json:"includedNumbers"`                           //Numbers which must be part of the solution
+	GetDigitsInAllCombinations         bool     `json:"getDigitsInAllCombinations,omitempty"`      //Return list of numbers present in all combinations
+	GetDigitsAbsentFromAllCombinations bool     `json:"getDigitsNotFromAllCombinations,omitempty"` //Return list of numbers absent from all combinations
+}
+
+type DataSetQueryResponse struct {
+	Combinations                  []string `json:"combinations"`                            // Valid Combinations
+	DigitsInAllCombinations       []string `json:"digitsInAllCombinations,omitempty"`       //Digits which are present in all combinations
+	DigitsAbsentInAllCombinations []string `json:"digitsAbsentInAllCombinations,omitempty"` //Digits which are absent from all combinations
 }
 
 // Generate the DataSet of all possible combinations
@@ -31,6 +40,7 @@ func GenerateDataSet() DataSet {
 		idx++
 	}
 	return dataSet
+
 }
 
 func (ds DataSet) UpdateValueCombination(NumberOfDigits, Value int, Combination string) {
@@ -42,18 +52,75 @@ func (ds DataSet) UpdateValueCombination(NumberOfDigits, Value int, Combination 
 	}
 }
 
-func (ds DataSet) Query(dsq DataSetQuery) ([]string, error) {
+func (ds DataSet) Query(dsq DataSetQuery) (DataSetQueryResponse, error) {
+
+	response := DataSetQueryResponse{}
 
 	err := dsq.Validate()
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	combinations := ds[dsq.NumberOfDigits][dsq.Value]
 
-	nl := GetValidCombinations(combinations, dsq.NumbersToExclude, dsq.NumbersToInclude)
+	response.Combinations = GetValidCombinations(combinations, dsq.NumbersToExclude, dsq.NumbersToInclude)
 
-	return nl, nil
+	if dsq.GetDigitsInAllCombinations {
+		response.GetDigitsInAllCombinations()
+	}
+
+	if dsq.GetDigitsAbsentFromAllCombinations {
+		response.GetDigitsAbsentInAllCombinations()
+	}
+
+	return response, nil
+}
+
+func (response *DataSetQueryResponse) GetDigitsInAllCombinations() {
+
+	eligibleNumbers := setupValidationNumberList(all)
+
+	for k := range eligibleNumbers {
+		if eligibleNumbers[k] {
+			eligibleNumbers[k] = ConfirmDigitInCombinations(k, response.Combinations)
+		}
+		if eligibleNumbers[k] {
+			response.DigitsInAllCombinations = append(response.DigitsInAllCombinations, k)
+		}
+	}
+}
+
+func ConfirmDigitInCombinations(testDigit string, combinations []string) bool {
+	for _, item := range combinations {
+		if !strings.Contains(item, testDigit) {
+			return false
+		}
+	}
+	return true
+}
+
+func (response *DataSetQueryResponse) GetDigitsAbsentInAllCombinations() {
+
+	eligibleNumbers := setupValidationNumberList(all)
+	response.DigitsAbsentInAllCombinations = []string{}
+
+	for k := range eligibleNumbers {
+		if eligibleNumbers[k] {
+			eligibleNumbers[k] = ConfirmDigitAbsentFromAllCombinations(k, response.Combinations)
+		}
+		if eligibleNumbers[k] {
+			response.DigitsAbsentInAllCombinations = append(response.DigitsAbsentInAllCombinations, k)
+		}
+	}
+}
+
+func ConfirmDigitAbsentFromAllCombinations(testDigit string, combinations []string) bool {
+	for _, item := range combinations {
+		if strings.Contains(item, testDigit) {
+			return false
+		}
+	}
+	return true
 }
 
 func (dsq DataSetQuery) Validate() error {

@@ -2,16 +2,16 @@ package sudokucalc
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"reflect"
 	"testing"
 )
 
 type dataSetQueryTestCase struct {
-	Name        string
-	DSQ         DataSetQuery
-	ExpectError bool
+	Name             string
+	DSQ              DataSetQuery
+	ExpectedResponse DataSetQueryResponse
+	ExpectError      bool
 }
 
 type NumberRangeTestCases struct {
@@ -91,21 +91,67 @@ func TestFullDataSet(t *testing.T) {
 
 func TestDataSetQuery(t *testing.T) {
 
-	dsq := DataSetQuery{
-		NumberOfDigits:   4,
-		Value:            21,
-		NumbersToInclude: []string{"1"},
-		NumbersToExclude: []string{"5", "6"},
+	testCases := []dataSetQueryTestCase{
+		{
+			Name: "valid query",
+			DSQ: DataSetQuery{
+				NumberOfDigits:   4,
+				Value:            21,
+				NumbersToInclude: []string{"1"},
+				NumbersToExclude: []string{"5", "6"},
+			},
+			ExpectedResponse: DataSetQueryResponse{
+				Combinations: []string{"1389", "1479"},
+			},
+			ExpectError: false,
+		},
+		{
+			Name: "included and excluded numbers",
+			DSQ: DataSetQuery{
+				NumberOfDigits:                     4,
+				Value:                              21,
+				NumbersToInclude:                   []string{"1"},
+				NumbersToExclude:                   []string{"5", "6"},
+				GetDigitsInAllCombinations:         true,
+				GetDigitsAbsentFromAllCombinations: true,
+			},
+			ExpectedResponse: DataSetQueryResponse{
+				Combinations:                  []string{"1389", "1479"},
+				DigitsInAllCombinations:       []string{"1", "9"},
+				DigitsAbsentInAllCombinations: []string{"2", "5", "6"},
+			},
+			ExpectError: false,
+		},
+		{
+			Name: "invalid query",
+			DSQ: DataSetQuery{
+				NumberOfDigits:   3,
+				Value:            6,
+				NumbersToExclude: []string{"8", "9", "45"},
+				NumbersToInclude: []string{"1", "2"},
+			},
+			ExpectError: true,
+		},
 	}
 
 	ds := GenerateDataSet()
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+			got, err := ds.Query(test.DSQ)
+			assertError(t, err, test.ExpectError)
 
-	got, err := ds.Query(dsq)
-	if err != nil {
-		t.Errorf("got error %s", err)
+			if err == nil {
+				assertElementsMatch(t, got.Combinations, test.ExpectedResponse.Combinations)
+			}
+
+			if test.DSQ.GetDigitsInAllCombinations {
+				assertElementsMatch(t, got.DigitsInAllCombinations, test.ExpectedResponse.DigitsInAllCombinations)
+			}
+			if test.DSQ.GetDigitsAbsentFromAllCombinations {
+				assertElementsMatch(t, got.DigitsAbsentInAllCombinations, test.ExpectedResponse.DigitsAbsentInAllCombinations)
+			}
+		})
 	}
-
-	fmt.Printf("%v", got)
 }
 
 func importDataSet(t testing.TB) DataSet {

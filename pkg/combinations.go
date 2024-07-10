@@ -11,7 +11,7 @@ import (
 var all = []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
 type ValueErr string
-type ValidCombinations map[string]bool
+type ValidationNumberList map[string]bool
 type DataSet map[int]map[int][]string
 
 // Generates a list of valid number combinations
@@ -40,12 +40,8 @@ func generateNumberLists(idx int, nl []string) []string {
 
 func GetValidCombinations(combinations, exclude, include []string) []string {
 
-	valid := ValidCombinations{}
+	valid := setupValidationNumberList(combinations)
 	nl := []string{}
-
-	for _, item := range combinations {
-		valid[item] = true
-	}
 
 	// All combinations start as valid and then checked to determine if invalid
 	for k := range valid {
@@ -103,4 +99,12 @@ func ValidateNumberRange(min, max, given int) error {
 		return fmt.Errorf("number %d is outside range of %d and %d", given, min, max)
 	}
 	return nil
+}
+
+func setupValidationNumberList(sourceList []string) ValidationNumberList {
+	valid := ValidationNumberList{}
+	for _, item := range sourceList {
+		valid[item] = true
+	}
+	return valid
 }

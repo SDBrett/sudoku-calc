@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type ValidCombinationTestCase struct {
@@ -21,7 +23,7 @@ func TestGenerateNumberLists(t *testing.T) {
 		got := generateNumberLists(1, nil)
 		want := []string{"12", "13", "14", "15", "16", "17", "18", "19", "23", "24", "25", "26", "27", "28", "29", "34", "35", "36", "37", "38", "39", "45", "46", "47", "48", "49", "56", "57", "58", "59", "67", "68", "69", "78", "79", "89"}
 
-		assertNumberList(t, got, want)
+		assertElementsMatch(t, got, want)
 	})
 }
 
@@ -97,14 +99,14 @@ func TestGetValidCombinations(t *testing.T) {
 			got := GetValidCombinations(test.Combinations, test.NumbersToExclude, test.NumbersToInclude)
 			sort.Strings(got)
 			fmt.Println(got)
-			assertNumberList(t, got, test.Expected)
+			assertElementsMatch(t, got, test.Expected)
 		})
 	}
 }
 
-func assertNumberList(t testing.TB, got, want []string) {
+func assertElementsMatch(t testing.TB, got, want interface{}) {
 	t.Helper()
-	if !reflect.DeepEqual(got, want) {
+	if !assert.ElementsMatch(t, got, want) {
 		t.Errorf("got %v want %v", got, want)
 	}
 }
