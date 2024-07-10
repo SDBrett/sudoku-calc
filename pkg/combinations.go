@@ -1,43 +1,33 @@
 package sudokucalc
 
 import (
-	"log"
+	"fmt"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
-const (
-	ErrNotFound          = ValueErr("could not find the value you were looking for")
-	ErrValueExists       = ValueErr("cannot add value because it already exists")
-	ErrValueDoesNotExist = ValueErr("cannot update value because it does not exist")
-	ErrUpdating          = ValueErr("error updating")
-)
+var all = []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
-var all = NumberList{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
-
-type NumberList []string
 type ValueErr string
-type ValueCombinations map[int]NumberList
 type ValidCombinations map[string]bool
+type DataSet map[int]map[int][]string
 
 // Generates a list of valid number combinations
-func generateNumberLists(idx int, nl NumberList) NumberList {
+func generateNumberLists(idx int, nl []string) []string {
 
 	if nl == nil {
 		nl = all
 	}
 
-	outlist := NumberList{}
+	outlist := []string{}
 	sorted := ""
 
 	for i := idx; i < len(all); i++ {
 		for x := 0; x < len(nl); x++ {
 			if !strings.Contains(nl[x], all[i]) {
-				sorted = utils.SortString(nl[x] + all[i])
+				sorted = SortString(nl[x] + all[i])
 				if !slices.Contains(outlist, sorted) {
 					outlist = append(outlist, sorted)
 				}
@@ -48,82 +38,10 @@ func generateNumberLists(idx int, nl NumberList) NumberList {
 	return outlist
 }
 
-// Create a map of different values and the possible combinations
-// of digits for that value
-func getCombinationsForValue() ValueCombinations {
-
-	dc := ValueCombinations{}
-	value := 0
-	asInt := 0
-	nl := all
-	numberOfDigits := 2
-	idx := 1
-	for numberOfDigits < 10 {
-		nl = generateNumberLists(idx, nl)
-
-		for _, combination := range nl {
-			value = 0
-			idx := 1
-			for i := 0; i < len(combination); i++ {
-				asInt, _ = strconv.Atoi(combination[i:idx])
-				value += asInt
-				idx++
-			}
-
-			err := dc.Update(value, combination)
-
-			if err != ErrUpdating && err != nil {
-				log.Fatal(err)
-			}
-
-		}
-
-		numberOfDigits++
-		idx++
-
-	}
-
-	return dc
-}
-
-// Look up number combinations for a given value
-// Returns list of combinations for that value
-func (vc ValueCombinations) Search(value int) (NumberList, error) {
-
-	nl, ok := vc[value]
-
-	if !ok {
-		return nil, ErrNotFound
-	}
-	return nl, nil
-}
-
-// Update the combinations to a list of combinations for a a given value
-func (vc ValueCombinations) Update(value int, combination string) error {
-
-	nl, err := vc.Search(value)
-	switch err {
-	case ErrNotFound:
-		nl := NumberList{combination}
-		vc[value] = nl
-	case nil:
-		nl = append(nl, combination)
-		vc[value] = nl
-	default:
-		return err
-	}
-
-	return nil
-}
-
-func (e ValueErr) Error() string {
-	return string(e)
-}
-
-func GetValidCombinations(combinations, exclude, include NumberList) NumberList {
+func GetValidCombinations(combinations, exclude, include []string) []string {
 
 	valid := ValidCombinations{}
-	nl := NumberList{}
+	nl := []string{}
 
 	for _, item := range combinations {
 		valid[item] = true
@@ -148,7 +66,7 @@ func GetValidCombinations(combinations, exclude, include NumberList) NumberList 
 	return nl
 }
 
-func ConfirmCombinationContainsIncludedNumbers(candidateCombination string, includeNumberList NumberList) bool {
+func ConfirmCombinationContainsIncludedNumbers(candidateCombination string, includeNumberList []string) bool {
 	for _, item := range includeNumberList {
 		if !strings.Contains(candidateCombination, item) {
 			return false
@@ -157,11 +75,32 @@ func ConfirmCombinationContainsIncludedNumbers(candidateCombination string, incl
 	return true
 }
 
-func ConfirmNoExcludedNumbersInCombinations(candidateCombination string, excludeNumberList NumberList) bool {
+func ConfirmNoExcludedNumbersInCombinations(candidateCombination string, excludeNumberList []string) bool {
 	for _, item := range excludeNumberList {
 		if strings.Contains(candidateCombination, item) {
 			return false
 		}
 	}
 	return true
+}
+
+func GetValueOfCombination(combination string) (int, error) {
+	value := 0
+	idx := 1
+	for i := 0; i < len(combination); i++ {
+		asInt, err := strconv.Atoi(combination[i:idx])
+		if err != nil {
+			return 0, err
+		}
+		value += asInt
+		idx++
+	}
+	return value, nil
+}
+
+func ValidateNumberRange(min, max, given int) error {
+	if given < min || given > max {
+		return fmt.Errorf("number %d is outside range of %d and %d", given, min, max)
+	}
+	return nil
 }
