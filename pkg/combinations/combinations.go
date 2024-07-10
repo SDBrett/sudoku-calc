@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
 const (
@@ -20,12 +22,6 @@ type ValueErr string
 type DigitCombinations map[int]NumberList
 type Combinations map[int]DigitCombinations
 
-func sortString(w string) string {
-	s := strings.Split(w, "")
-	sort.Strings(s)
-	return strings.Join(s, "")
-}
-
 func GetCombinations(idx int, nl NumberList) NumberList {
 
 	if nl == nil {
@@ -38,7 +34,7 @@ func GetCombinations(idx int, nl NumberList) NumberList {
 	for i := idx; i < len(all); i++ {
 		for x := 0; x < len(nl); x++ {
 			if !strings.Contains(nl[x], all[i]) {
-				sorted = sortString(nl[x] + all[i])
+				sorted = utils.SortString(nl[x] + all[i])
 				if !slices.Contains(outlist, sorted) {
 					outlist = append(outlist, sorted)
 				}
