@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	utils "github.com/sdbrett/sudoku-calc/pkg/utils"
 )
 
 const (
@@ -76,7 +78,7 @@ func GetValues(nl NumberList) DigitCombinations {
 			value += asInt
 			idx++
 		}
-		strValue = intToString(value)
+		strValue = utils.IntToString(value)
 		err := dc.Update(strValue, combination)
 		if err == ErrValueDoesNotExist {
 			dc.Add(strValue, combination)
@@ -152,8 +154,4 @@ func (combo Combinations) Add(value string, dc DigitCombinations) error {
 		return err
 	}
 	return nil
-}
-
-func intToString(i int) string {
-	return strconv.Itoa(i)
 }

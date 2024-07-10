@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	combinations "github.com/sdbrett/sudoku-calc/pkg"
+	combinations "github.com/sdbrett/sudoku-calc/pkg/combinations"
 )
 
 func main() {
