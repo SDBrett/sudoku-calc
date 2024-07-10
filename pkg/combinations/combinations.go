@@ -21,22 +21,15 @@ var all = NumberList{"1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
 type NumberList []string
 type ValueErr string
-type DigitCombinations map[int]NumberList
-type Combinations map[int]DigitCombinations
+type ValueCombinations map[int]NumberList
+type DataSet map[int]ValueCombinations
 
-func GenerateDataSet() Combinations {
-	combinationsByValue := GetValues()
+// Generate the DataSet of all possible combinations
+func GenerateDataSet() DataSet {
+	combinationsByValue := getCombinationsForValue()
 
-	dataSet := Combinations{
-		2: DigitCombinations{},
-		3: DigitCombinations{},
-		4: DigitCombinations{},
-		5: DigitCombinations{},
-		6: DigitCombinations{},
-		7: DigitCombinations{},
-		8: DigitCombinations{},
-		9: DigitCombinations{},
-	}
+	// Initialize dataSet
+	dataSet := newDataSet()
 
 	// k is the sum of the items in the array
 	// v is the list of combinations
@@ -50,7 +43,8 @@ func GenerateDataSet() Combinations {
 	return dataSet
 }
 
-func GetCombinations(idx int, nl NumberList) NumberList {
+// Generates a list of valid number combinations
+func generateNumberLists(idx int, nl NumberList) NumberList {
 
 	if nl == nil {
 		nl = all
@@ -73,16 +67,18 @@ func GetCombinations(idx int, nl NumberList) NumberList {
 	return outlist
 }
 
-func GetValues() DigitCombinations {
+// Create a map of different values and the possible combinations
+// of digits for that value
+func getCombinationsForValue() ValueCombinations {
 
-	dc := DigitCombinations{}
+	dc := ValueCombinations{}
 	value := 0
 	asInt := 0
 	nl := all
 	numberOfDigits := 2
 	idx := 1
 	for numberOfDigits < 10 {
-		nl = GetCombinations(idx, nl)
+		nl = generateNumberLists(idx, nl)
 
 		for _, combination := range nl {
 			value = 0
@@ -110,7 +106,9 @@ func GetValues() DigitCombinations {
 
 }
 
-func (dc DigitCombinations) Search(value int) (NumberList, error) {
+// Look up number combinations for a given value
+// Returns list of combinations for that value
+func (dc ValueCombinations) Search(value int) (NumberList, error) {
 
 	nl, ok := dc[value]
 
@@ -120,7 +118,8 @@ func (dc DigitCombinations) Search(value int) (NumberList, error) {
 	return nl, nil
 }
 
-func (dc DigitCombinations) Update(value int, combination string) error {
+// Update the combinations to a list of combinations for a a given value
+func (dc ValueCombinations) Update(value int, combination string) error {
 
 	nl, err := dc.Search(value)
 	switch err {
@@ -141,12 +140,29 @@ func (e ValueErr) Error() string {
 	return string(e)
 }
 
-func (combo Combinations) Search(value int) (DigitCombinations, error) {
+// Returns possible values and their combinations with a given
+// number of digits.
+func (dc DataSet) Search(value int) (ValueCombinations, error) {
 
-	nl, ok := combo[value]
+	nl, ok := dc[value]
 
 	if !ok {
 		return nil, ErrNotFound
 	}
 	return nl, nil
+}
+
+func newDataSet() DataSet {
+	dataSet := DataSet{
+		2: ValueCombinations{},
+		3: ValueCombinations{},
+		4: ValueCombinations{},
+		5: ValueCombinations{},
+		6: ValueCombinations{},
+		7: ValueCombinations{},
+		8: ValueCombinations{},
+		9: ValueCombinations{},
+	}
+
+	return dataSet
 }
