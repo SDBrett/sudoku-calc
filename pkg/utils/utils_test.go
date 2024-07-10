@@ -11,6 +11,30 @@ func TestIntToString(t *testing.T) {
 	assertStrings(t, got, want)
 }
 
+func TestStringToInt(t *testing.T) {
+
+	t.Run("no error", func(t *testing.T) {
+		got, err := StringToInt("1234")
+		want := 1234
+
+		if err != nil {
+			t.Errorf("expected no error, go %s", err)
+		}
+
+		if got != want {
+			t.Errorf("got %v want %v", got, want)
+		}
+	})
+
+	t.Run("invalid input", func(t *testing.T) {
+		_, err := StringToInt("12abc34")
+
+		if err == nil {
+			t.Errorf("expected error but did not get one")
+		}
+	})
+}
+
 func TestSortString(t *testing.T) {
 
 	cases := []struct {
