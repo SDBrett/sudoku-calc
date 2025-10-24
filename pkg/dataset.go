@@ -47,6 +47,8 @@ func (ds DataSet) UpdateValueCombination(NumberOfDigits, Value int, Combination 
 
 func (ds DataSet) Query(dsq DataSetQuery) ([]string, error) {
 
+	log.Printf("DEBUG: Received query - GetNumbersNotPresent: %v, GetNumbersPresentAllCombinations: %v", dsq.GetNumbersNotPresent, dsq.GetNumbersPresentAllCombinations)
+
 	err := dsq.Validate()
 	if err != nil {
 		return nil, err
@@ -55,6 +57,30 @@ func (ds DataSet) Query(dsq DataSetQuery) ([]string, error) {
 	combinations := ds[dsq.NumberOfDigits][dsq.Value]
 
 	nl := GetValidCombinations(combinations, dsq.NumbersToExclude, dsq.NumbersToInclude)
+
+	// Handle additional analysis options
+	if dsq.GetNumbersNotPresent || dsq.GetNumbersPresentAllCombinations {
+		log.Printf("DEBUG: Analysis requested - GetNumbersNotPresent: %v, GetNumbersPresentAllCombinations: %v", dsq.GetNumbersNotPresent, dsq.GetNumbersPresentAllCombinations)
+		analysis := AnalyzeCombinations(nl, dsq.NumberOfDigits)
+		
+		if dsq.GetNumbersNotPresent && dsq.GetNumbersPresentAllCombinations {
+			// Return both analyses
+			result := []string{}
+			result = append(result, "=== COMBINATIONS ===")
+			result = append(result, nl...)
+			result = append(result, "=== NUMBERS NOT PRESENT ===")
+			result = append(result, analysis.NumbersNotPresent...)
+			result = append(result, "=== NUMBERS IN ALL COMBINATIONS ===")
+			result = append(result, analysis.NumbersInAllCombinations...)
+			return result, nil
+		} else if dsq.GetNumbersNotPresent {
+			log.Printf("DEBUG: Returning numbers not present: %v", analysis.NumbersNotPresent)
+			return analysis.NumbersNotPresent, nil
+		} else if dsq.GetNumbersPresentAllCombinations {
+			log.Printf("DEBUG: Returning numbers in all combinations: %v", analysis.NumbersInAllCombinations)
+			return analysis.NumbersInAllCombinations, nil
+		}
+	}
 
 	return nl, nil
 }
@@ -136,4 +162,56 @@ func newDataSet() DataSet {
 	}
 
 	return dataSet
+}
+
+// CombinationAnalysis holds the results of analyzing combinations
+type CombinationAnalysis struct {
+	NumbersNotPresent           []string
+	NumbersInAllCombinations    []string
+}
+
+// AnalyzeCombinations analyzes the given combinations to find numbers not present and numbers present in all combinations
+func AnalyzeCombinations(combinations []string, numberOfDigits int) CombinationAnalysis {
+	analysis := CombinationAnalysis{
+		NumbersNotPresent:        []string{},
+		NumbersInAllCombinations: []string{},
+	}
+
+	if len(combinations) == 0 {
+		// If no combinations, all numbers 1-9 are not present
+		for i := 1; i <= 9; i++ {
+			analysis.NumbersNotPresent = append(analysis.NumbersNotPresent, fmt.Sprintf("%d", i))
+		}
+		return analysis
+	}
+
+	// Track which numbers appear in each combination
+	numberCounts := make(map[string]int)
+	totalCombinations := len(combinations)
+
+	// Count occurrences of each number across all combinations
+	for _, combination := range combinations {
+		for _, char := range combination {
+			number := string(char)
+			numberCounts[number]++
+		}
+	}
+
+	// Find numbers not present in any combination
+	for i := 1; i <= 9; i++ {
+		numberStr := fmt.Sprintf("%d", i)
+		if numberCounts[numberStr] == 0 {
+			analysis.NumbersNotPresent = append(analysis.NumbersNotPresent, numberStr)
+		}
+	}
+
+	// Find numbers present in all combinations
+	for i := 1; i <= 9; i++ {
+		numberStr := fmt.Sprintf("%d", i)
+		if numberCounts[numberStr] == totalCombinations {
+			analysis.NumbersInAllCombinations = append(analysis.NumbersInAllCombinations, numberStr)
+		}
+	}
+
+	return analysis
 }

@@ -1,0 +1,22 @@
+---
+alwaysApply: true
+---
+
+# Git Commit Rules
+
+## Automatic Git Operations
+After completing all tasks, automatically perform the following git operations:
+
+1. **Stage all changes**: `git add .`
+2. **Commit with cursor prefix**: `git commit -m "cursor: [description]"`
+
+## Commit Message Format
+- Always prefix commit messages with "cursor: "
+- Include a descriptive summary of the changes made
+- Examples:
+  - `cursor: add web interface with side-by-side layout`
+  - `cursor: fix validation ranges for different digit counts`
+  - `cursor: implement 3x3 grid for number selection`
+
+## Implementation
+This rule ensures all AI-assisted changes are properly tracked in git history with clear identification of cursor-generated commits.
