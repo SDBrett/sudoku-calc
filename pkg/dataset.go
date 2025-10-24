@@ -1,14 +1,17 @@
 package sudokucalc
 
 import (
+	"fmt"
 	"log"
 )
 
 type DataSetQuery struct {
-	NumberOfDigits   int      `json:"numberOfDigits"`  //The number of digits
-	Value            int      `json:"value"`           //The Value for the digits to sum to
-	NumbersToExclude []string `json:"excludedNumbers"` //Numbers which cannot be part of the solution
-	NumbersToInclude []string `json:"includedNumbers"` //Numbers which must be part of the solution
+	NumberOfDigits                   int      `json:"numberOfDigits"`                             //The number of digits
+	Value                            int      `json:"value"`                                      //The Value for the digits to sum to
+	NumbersToExclude                 []string `json:"excludedNumbers"`                            //Numbers which cannot be part of the solution
+	NumbersToInclude                 []string `json:"includedNumbers"`                            //Numbers which must be part of the solution
+	GetNumbersNotPresent             bool     `json:"getNumbersNotPresent,omitempty"`             //Return list of numbers which are not present in any result
+	GetNumbersPresentAllCombinations bool     `json:"getNumbersPresentAllCombinations,omitempty"` //Return list of numbers which are present in all combinations
 }
 
 // Generate the DataSet of all possible combinations
@@ -61,14 +64,17 @@ func (dsq DataSetQuery) Validate() error {
 	var err error
 	var x int
 
-	err = ValidateNumberRange(1, 9, dsq.NumberOfDigits)
+	err = ValidateNumberRange(2, 9, dsq.NumberOfDigits)
 	if err != nil {
 		return err
 	}
 
-	err = ValidateNumberRange(3, 45, dsq.Value)
+	// Calculate valid range based on number of digits
+	minSum := calculateMinSum(dsq.NumberOfDigits)
+	maxSum := calculateMaxSum(dsq.NumberOfDigits)
+	err = ValidateNumberRange(minSum, maxSum, dsq.Value)
 	if err != nil {
-		return err
+		return fmt.Errorf("value %d is outside valid range for %d digits (%d-%d)", dsq.Value, dsq.NumberOfDigits, minSum, maxSum)
 	}
 
 	for _, v := range dsq.NumbersToInclude {
@@ -94,6 +100,24 @@ func (dsq DataSetQuery) Validate() error {
 	}
 
 	return nil
+}
+
+// calculateMinSum calculates the minimum possible sum for a given number of digits
+func calculateMinSum(numberOfDigits int) int {
+	sum := 0
+	for i := 1; i <= numberOfDigits; i++ {
+		sum += i
+	}
+	return sum
+}
+
+// calculateMaxSum calculates the maximum possible sum for a given number of digits
+func calculateMaxSum(numberOfDigits int) int {
+	sum := 0
+	for i := 9 - numberOfDigits + 1; i <= 9; i++ {
+		sum += i
+	}
+	return sum
 }
 
 func newDataSet() DataSet {

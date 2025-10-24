@@ -19,22 +19,38 @@ func queryDataSet(c *gin.Context) {
 	var dsq sudokucalc.DataSetQuery
 	var err error
 	if err = c.BindJSON(&dsq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format"})
 		return
 	}
 
 	response, err := ds.Query(dsq)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusAccepted, response)
+	c.JSON(http.StatusOK, response)
 }
 
 func main() {
 
 	r := gin.Default()
+	
+	// Serve static files (CSS, JS)
+	r.Static("/static", "./static")
+	
+	// Load HTML templates
+	r.LoadHTMLGlob("templates/*")
+	
+	// Serve the main web interface
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+	
+	// API endpoints
 	r.GET("/dataset", getDataset)
 	r.POST("/dataset", queryDataSet)
+	
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8080")
 }
