@@ -1,6 +1,7 @@
 package sudokucalc
 
 import (
+	"errors"
 	"fmt"
 	"log"
 )
@@ -12,6 +13,12 @@ type DataSetQuery struct {
 	NumbersToInclude                 []string `json:"includedNumbers"`                            //Numbers which must be part of the solution
 	GetNumbersNotPresent             bool     `json:"getNumbersNotPresent,omitempty"`             //Return list of numbers which are not present in any result
 	GetNumbersPresentAllCombinations bool     `json:"getNumbersPresentAllCombinations,omitempty"` //Return list of numbers which are present in all combinations
+}
+
+type DataSetQueryResponse struct {
+	Combinations                    []string `json:"combinations"`                              // Valid Combinations
+	DigitsInAllCombinations         []string `json:"digitsInAllCombinations,omitempty"`         //Digits which are present in all combinations
+	DigitsAbsentFromAllCombinations []string `json:"digitsAbsentFromAllCombinations,omitempty"` //Digits which are absent from all combinations
 }
 
 // Generate the DataSet of all possible combinations
@@ -45,44 +52,35 @@ func (ds DataSet) UpdateValueCombination(NumberOfDigits, Value int, Combination 
 	}
 }
 
-func (ds DataSet) Query(dsq DataSetQuery) ([]string, error) {
+func (ds DataSet) Query(dsq DataSetQuery) (DataSetQueryResponse, error) {
+
+	response := DataSetQueryResponse{}
 
 	log.Printf("DEBUG: Received query - GetNumbersNotPresent: %v, GetNumbersPresentAllCombinations: %v", dsq.GetNumbersNotPresent, dsq.GetNumbersPresentAllCombinations)
 
 	err := dsq.Validate()
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	combinations := ds[dsq.NumberOfDigits][dsq.Value]
 
-	nl := GetValidCombinations(combinations, dsq.NumbersToExclude, dsq.NumbersToInclude)
+	response.Combinations = GetValidCombinations(combinations, dsq.NumbersToExclude, dsq.NumbersToInclude)
+	if len(response.Combinations) == 0 {
+		return response, errors.New("no combinations found")
+	}
 
-	// Handle additional analysis options
-	if dsq.GetNumbersNotPresent || dsq.GetNumbersPresentAllCombinations {
-		log.Printf("DEBUG: Analysis requested - GetNumbersNotPresent: %v, GetNumbersPresentAllCombinations: %v", dsq.GetNumbersNotPresent, dsq.GetNumbersPresentAllCombinations)
-		analysis := AnalyzeCombinations(nl, dsq.NumberOfDigits)
-		
-		if dsq.GetNumbersNotPresent && dsq.GetNumbersPresentAllCombinations {
-			// Return both analyses
-			result := []string{}
-			result = append(result, "=== COMBINATIONS ===")
-			result = append(result, nl...)
-			result = append(result, "=== NUMBERS NOT PRESENT ===")
-			result = append(result, analysis.NumbersNotPresent...)
-			result = append(result, "=== NUMBERS IN ALL COMBINATIONS ===")
-			result = append(result, analysis.NumbersInAllCombinations...)
-			return result, nil
-		} else if dsq.GetNumbersNotPresent {
-			log.Printf("DEBUG: Returning numbers not present: %v", analysis.NumbersNotPresent)
-			return analysis.NumbersNotPresent, nil
-		} else if dsq.GetNumbersPresentAllCombinations {
-			log.Printf("DEBUG: Returning numbers in all combinations: %v", analysis.NumbersInAllCombinations)
-			return analysis.NumbersInAllCombinations, nil
+	if dsq.GetNumbersPresentAllCombinations || dsq.GetNumbersNotPresent {
+		combinationAnalysis := AnalyzeCombinations(response.Combinations, dsq.NumberOfDigits)
+		if dsq.GetNumbersNotPresent {
+			response.DigitsAbsentFromAllCombinations = combinationAnalysis.NumbersNotPresent
+		}
+		if dsq.GetNumbersPresentAllCombinations {
+			response.DigitsInAllCombinations = combinationAnalysis.NumbersInAllCombinations
 		}
 	}
 
-	return nl, nil
+	return response, nil
 }
 
 func (dsq DataSetQuery) Validate() error {
@@ -166,8 +164,8 @@ func newDataSet() DataSet {
 
 // CombinationAnalysis holds the results of analyzing combinations
 type CombinationAnalysis struct {
-	NumbersNotPresent           []string
-	NumbersInAllCombinations    []string
+	NumbersNotPresent        []string
+	NumbersInAllCombinations []string
 }
 
 // AnalyzeCombinations analyzes the given combinations to find numbers not present and numbers present in all combinations
