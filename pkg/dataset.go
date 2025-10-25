@@ -54,9 +54,9 @@ func (ds DataSet) UpdateValueCombination(NumberOfDigits, Value int, Combination 
 
 func (ds DataSet) Query(dsq DataSetQuery) (DataSetQueryResponse, error) {
 
-	response := DataSetQueryResponse{}
-
-	log.Printf("DEBUG: Received query - GetNumbersNotPresent: %v, GetNumbersPresentAllCombinations: %v", dsq.GetNumbersNotPresent, dsq.GetNumbersPresentAllCombinations)
+	response := DataSetQueryResponse{
+		Combinations: []string{},
+	}
 
 	err := dsq.Validate()
 	if err != nil {

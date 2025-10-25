@@ -28,8 +28,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 getNumbersPresentAllCombinations: formData.has('getNumbersPresentAllCombinations')
             };
 
+            console.log('Sending data:', data);
+
             // Make API request
-            const response = await fetch('/dataset', {
+            const fetchResponse = await fetch('/dataset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,16 +39,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(data)
             });
 
-            const result = await response.json();
+            const result = await fetchResponse.json();
             
-            if (!response.ok) {
-                throw new Error(result.error || `HTTP error! status: ${response.status}`);
+            console.log('Received response:', result);
+            
+            if (!fetchResponse.ok) {
+                throw new Error(result.error || `HTTP error! status: ${fetchResponse.status}`);
             }
 
-            const combinations = result;
-            
             // Display results
-            displayResults(combinations, data);
+            displayResults(result, data);
             
         } catch (error) {
             console.error('Error:', error);
@@ -54,20 +56,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function displayResults(combinations, queryData) {
+    function displayResults(response, queryData) {
         let html = '';
         
-        if (combinations.length === 0) {
+        if (!response.combinations || response.combinations.length === 0) {
             html = '<p>No combinations found matching your criteria.</p>';
         } else {
-            html = `<p><strong>Found ${combinations.length} combination(s):</strong></p>`;
+            html = `<p><strong>Found ${response.combinations.length} combination(s):</strong></p>`;
             html += '<div class="combination-list">';
             
-            combinations.forEach(combination => {
+            response.combinations.forEach(combination => {
                 html += `<div class="combination-item">${combination}</div>`;
             });
             
             html += '</div>';
+            
+            // Add analysis results if available
+            if (response.digitsInAllCombinations && Array.isArray(response.digitsInAllCombinations) && response.digitsInAllCombinations.length > 0) {
+                html += '<div style="margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 6px;">';
+                html += '<h3>Numbers Present in All Combinations:</h3>';
+                html += `<p>${response.digitsInAllCombinations.join(', ')}</p>`;
+                html += '</div>';
+            }
+            
+            if (response.digitsAbsentFromAllCombinations && Array.isArray(response.digitsAbsentFromAllCombinations) && response.digitsAbsentFromAllCombinations.length > 0) {
+                html += '<div style="margin-top: 20px; padding: 15px; background: #f8d7da; border-radius: 6px;">';
+                html += '<h3>Numbers Not Present in Any Combination:</h3>';
+                html += `<p>${response.digitsAbsentFromAllCombinations.join(', ')}</p>`;
+                html += '</div>';
+            }
             
             // Add summary information
             html += '<div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 6px;">';
